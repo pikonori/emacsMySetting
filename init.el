@@ -25,6 +25,8 @@
 ;;自動改行しない
 (setq-default truncate-partial-width-windows t)
 (setq-default truncate-lines t)
+;;tabをspace4に
+(setq-default tab-width 4 indent-tabs-mode nil)
 
 ;; fullscreen
 (define-key global-map (kbd "M-RET") 'ns-toggle-fullscreen)
@@ -74,7 +76,7 @@
         (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
             (normal-top-level-add-subdirs-to-load-path))))))
 
-(add-to-load-path "elisp" "conf")
+(add-to-load-path "elisp")
 
 ;;補完機能
 (when (require 'auto-complete-config nil t)
@@ -165,8 +167,27 @@
 
 
 
-(require 'psvn)
-(setq process-coding-system-alist '(("svn" . utf-8)))
-(setq default-file-name-coding-system 'utf-8)
-(setq svn-status-svn-file-coding-system 'utf-8)
+
+;;ruby用
+(autoload 'ruby-mode "ruby-mode" "Mode for editing ruby source files" t)
+(setq auto-mode-alist (cons '("\\.rb$" . ruby-mode) auto-mode-alist))
+(setq interpreter-mode-alist (append '(("ruby" . ruby-mode)) interpreter-mode-alist))
+(autoload 'run-ruby "inf-ruby" "Run an inferior Ruby process")
+(autoload 'inf-ruby-keys "inf-ruby" "Set local key defs for inf-ruby in ruby-mode")
+(add-hook 'ruby-mode-hook '(lambda () (inf-ruby-keys)))
+
+;; ruby-electric.el --- electric editing commands for ruby files
+(require 'ruby-electric)
+(add-hook 'ruby-mode-hook '(lambda () (ruby-electric-mode t)))
+
+(setq ruby-indent-level 2)
+(setq ruby-indent-tabs-mode nil)
+
+(require 'less-css-mode)
+(add-to-list 'auto-mode-alist '("\\.less$" . less-css-mode))
+
+;; haml-mode
+(require 'haml-mode nil 't)
+(add-to-list 'auto-mode-alist '("\\.haml$" . haml-mode))
+
 
