@@ -14,6 +14,19 @@
 ;;括弧をハイライト
 ;;(setq show-paren-mode t)
 (show-paren-mode t)
+
+;; 括弧の範囲内を強調表示
+(show-paren-mode t)
+(setq show-paren-delay 0)
+(setq show-paren-style 'expression)
+
+;; 括弧の範囲色
+(set-face-background 'show-paren-match-face "#500")
+
+;; 行末の空白を強調表示
+(setq-default show-trailing-whitespace t)
+(set-face-background 'trailing-whitespace "#b14770")
+
 ;;起動時の画面を削除
 (setq inhibit-startup-message t)
 ;;Metaをaltからcommandに変更
@@ -26,6 +39,19 @@
 
 ;; fullscreen
 (define-key global-map (kbd "M-RET") 'ns-toggle-fullscreen)
+
+;; C-Ret で矩形選択
+;; 詳しいキーバインド操作：http://dev.ariel-networks.com/articles/emacs/part5/
+(cua-mode t)
+(setq cua-enable-cua-keys nil)
+(define-key global-map (kbd "C-;") 'cua-set-rectangle-mark)
+
+
+;; ------------------------------------------------------------------------
+;; @ key bind
+
+;; バックスラッシュ
+(define-key global-map (kbd "M-|") "\\")
 
 ;;半透明
 (when (eq window-system 'mac)
@@ -58,6 +84,16 @@
 
 
 
+;; 行番号表示
+(global-linum-mode t)
+(set-face-attribute 'linum nil
+                    :foreground "#800"
+                    :height 0.9)
+
+;; 行番号フォーマット
+(setq linum-format "%4d")
+
+;; load pathの設定
 (defun add-to-load-path (&rest paths)
   (let (path)
     (dolist (path paths paths)
@@ -87,7 +123,7 @@
 
 ;;redo undoを可能にする
 (when (require 'redo+ nil t)
-  (global-set-key (kbd "C-'") 'redo))
+  (global-set-key (kbd "C-_") 'redo))
 
 
 (when (require 'color-moccur nil t)
@@ -153,7 +189,7 @@
 
 ;;node.js用
 (require 'sws-mode)
-(require 'jade-mode)    
+(require 'jade-mode)
 (add-to-list 'auto-mode-alist '("\\.jade$" . jade-mode))
 
 
@@ -180,3 +216,52 @@
 (add-to-list 'auto-mode-alist '("\\.haml$" . haml-mode))
 
 
+;; ------------------------------------------------------------------------
+;; @ multi-term.el
+
+;; 端末エミュレータ
+;; http://www.emacswiki.org/emacs/multi-term.el
+(when (require 'multi-term nil t)
+  ;(setq multi-term-program "/bin/zsh")
+)
+
+
+;; ------------------------------------------------------------------------
+;; @ uniquify.el
+
+;; 同名バッファを分りやすくする
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'forward)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+(setq uniquify-ignore-buffers-re "*[^*]+*")
+
+
+
+;; ------------------------------------------------------------------------
+;; @ flymake
+(require 'flymake)
+(set-face-background 'flymake-errline "red4")
+(set-face-background 'flymake-warnline "dark slate blue")
+
+;; ruby
+;; Invoke ruby with '-c' to get syntax checking
+(defun flymake-ruby-init ()
+  (let* ((temp-file   (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+	 (local-file  (file-relative-name
+                       temp-file
+                       (file-name-directory buffer-file-name))))
+    (list "ruby" (list "-c" local-file))))
+
+(push '(".+\\.rb$" flymake-ruby-init) flymake-allowed-file-name-masks)
+(push '("Rakefile$" flymake-ruby-init) flymake-allowed-file-name-masks)
+
+(push '("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3) flymake-err-line-patterns)
+
+(add-hook 'ruby-mode-hook
+          '(lambda ()
+
+	     ;; Don't want flymake mode for ruby regions in rhtml files and also on read only files
+	     (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
+		 (flymake-mode))
+	     ))
