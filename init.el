@@ -1,9 +1,5 @@
+;;エンコード
 (set-language-environment "Japanese")
-(require 'ucs-normalize)
-;(prefer-coding-system 'utf-8-hfs)
-;(setq file-name-coding-system 'utf-8-hfs)
-;(setq locale-coding-system 'utf-8-hfs)
-
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 (setq file-name-coding-system 'utf-8)
@@ -34,10 +30,7 @@
 ;;半透明
 (when (eq window-system 'mac)
   (add-hook 'window-setup-hook
-            (lambda ()
-              (set-frame-parameter nil 'fullscreen 'fullboth)
-              ))
-  )
+            (lambda () (set-frame-parameter nil 'fullscreen 'fullboth))))
 
 
 (defun mac-toggle-max-window ()
@@ -62,9 +55,6 @@
 		    (set-cursor-color "Gray")
 		    (set-frame-parameter nil 'alpha 80)
 		    ))
-
-
-
 
 
 
@@ -101,7 +91,7 @@
 
 
 (when (require 'color-moccur nil t)
-  ;;グローバルマップに割当
+  ;;グローバルマップに割当
   (define-key global-map (kbd "M-o") 'occur-by-moccur)
   (setq moccur-split-word t)
   (add-to-list 'dmoccur-exclusion-mask "¥¥.DS_Store")
@@ -117,7 +107,7 @@
 
 (when (require 'anything nil t)
   (setq
-   ;;候補表示するまでの時間
+   ;;候補表示するまでの時間
    anything-idle-delay 0.3
    anything-input-idle-delay 0.1
    anything-candidate-number-limit 100
@@ -139,19 +129,19 @@
   (define-key global-map (kbd "C-l") 'anything)
   )
 
-;; php-mode
+;; php用
 (require 'php-mode)
 
 (setq php-mode-force-pear t) ;PEAR規約のインデント設定にする
 (add-to-list 'auto-mode-alist '("\\.php$" . php-mode));*.phpのファイルのときにphp-modeを自動起動する
-(add-to-list 'auto-mode-alist '("\\.ctp$" . php-mode));*.ctpのファイルのときにphp-modeを自動起動する
+(add-to-list 'auto-mode-alist '("\\.ctp$" . html-mode));*.ctpのファイルのときにphp-modeを自動起動する
 
 
 (add-hook 'php-mode-hook
           (lambda ()
             (require 'php-completion)
             (php-completion-mode t)
-            (define-key php-mode-map (kbd "C-o") 'phpcmp-complete) ;php-completionの補完実行キーバインドの設定
+            (define-key php-mode-map (kbd "C-o") 'phpcmp-complete) ;php-completionの補完実行キーバインドの設定
             (make-local-variable 'ac-sources)
             (setq ac-sources '(
                                ac-source-words-in-same-mode-buffers
@@ -159,13 +149,12 @@
                                ac-source-filename
                                ))))
 ;;インデントに色を付ける。
-(require 'highlight-indentation)
+;;(require 'highlight-indentation)
 
+;;node.js用
 (require 'sws-mode)
 (require 'jade-mode)    
 (add-to-list 'auto-mode-alist '("\\.jade$" . jade-mode))
-
-
 
 
 ;;ruby用
