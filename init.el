@@ -211,6 +211,9 @@
 (require 'less-css-mode)
 (add-to-list 'auto-mode-alist '("\\.less$" . less-css-mode))
 
+(add-to-list 'ac-modes 'less-css-mode)
+(add-hook 'less-css-mode-hook 'ac-css-mode-setup)
+
 ;; haml-mode
 (require 'haml-mode nil 't)
 (add-to-list 'auto-mode-alist '("\\.haml$" . haml-mode))
