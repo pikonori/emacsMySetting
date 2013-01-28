@@ -268,3 +268,8 @@
 	     (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
 		 (flymake-mode))
 	     ))
+
+
+
+(require 'auto-highlight-symbol)
+(global-auto-highlight-symbol-mode t)
