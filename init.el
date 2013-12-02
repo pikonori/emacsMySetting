@@ -175,6 +175,18 @@
 
 (add-hook 'php-mode-hook
           (lambda ()
+            (defun ywb-php-lineup-arglist-intro (langelem)
+              (save-excursion
+                (goto-char (cdr langelem))
+                (vector (+ (current-column) c-basic-offset))))
+            (defun ywb-php-lineup-arglist-close (langelem)
+              (save-excursion
+                (goto-char (cdr langelem))
+                (vector (current-column))))
+            (c-set-offset 'arglist-intro 'ywb-php-lineup-arglist-intro)
+            (c-set-offset 'arglist-close 'ywb-php-lineup-arglist-close)
+
+
             (require 'php-completion)
             (php-completion-mode t)
             (define-key php-mode-map (kbd "C-o") 'phpcmp-complete) ;php-completionの補完実行キーバインドの設定
@@ -183,7 +195,13 @@
                                ac-source-words-in-same-mode-buffers
                                ac-source-php-completion
                                ac-source-filename
-                               ))))
+                               ))
+            )
+          )
+
+
+
+
 ;;インデントに色を付ける。
 ;;(require 'highlight-indentation)
 
@@ -274,6 +292,19 @@
 (require 'auto-highlight-symbol)
 (global-auto-highlight-symbol-mode t)
 
+;; php
+(defun flymake-php-init ()
+  (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                     'flymake-create-temp-inplace))
+         (local-file (file-relative-name
+                      temp-file
+                      (file-name-directory buffer-file-name))))
+    (list "php" (list "-l" local-file))))
+(push '(".+\\.php$" flymake-php-init) flymake-allowed-file-name-masks)
+(push '("(Parse|Fatal) error: (.*) in (.*) on line ([0-9]+)" 3 4 nil 2) flymake-err-line-patterns)
+
+(add-hook 'php-mode-hook (flymake-mode t))
+
 
 ;;バックアップファイルの保存先変更
 
@@ -294,3 +325,41 @@
 
 (add-hook 'coffee-mode-hook
   '(lambda() (coffee-custom)))
+
+;; csv-mode
+(add-to-list 'auto-mode-alist '("\\.[Cc][Ss][Vv]\\'" . csv-mode))
+(autoload 'csv-mode "csv-mode"
+  "Major mode for editing comma-separated value files." t)
+
+;; フォント設定
+;;; フォントセットを作る
+(let* ((fontset-name "myfonts") ; フォントセットの名前
+       (size 12) ; ASCIIフォントのサイズ [9/10/12/14/15/17/19/20/...]
+       (asciifont "Menlo") ; ASCIIフォント
+       (jpfont "Hiragino Maru Gothic ProN") ; 日本語フォント
+       (font (format "%s-%d:weight=normal:slant=normal" asciifont size))
+       (fontspec (font-spec :family asciifont))
+       (jp-fontspec (font-spec :family jpfont)) 
+       (fsn (create-fontset-from-ascii-font font nil fontset-name)))
+  (set-fontset-font fsn 'japanese-jisx0213.2004-1 jp-fontspec)
+  (set-fontset-font fsn 'japanese-jisx0213-2 jp-fontspec)
+  (set-fontset-font fsn 'katakana-jisx0201 jp-fontspec) ; 半角カナ
+  (set-fontset-font fsn '(#x0080 . #x024F) fontspec) ; 分音符付きラテン
+  (set-fontset-font fsn '(#x0370 . #x03FF) fontspec) ; ギリシャ文字
+  )
+ 
+;;; デフォルトのフレームパラメータでフォントセットを指定
+(add-to-list 'default-frame-alist '(font . "fontset-myfonts"))
+ 
+;;; フォントサイズの比を設定
+(dolist (elt '(("^-apple-hiragino.*" . 1.2)
+	       (".*osaka-bold.*" . 1.2)
+	       (".*osaka-medium.*" . 1.2)
+	       (".*courier-bold-.*-mac-roman" . 1.0)
+	       (".*monaco cy-bold-.*-mac-cyrillic" . 0.9)
+	       (".*monaco-bold-.*-mac-roman" . 0.9)))
+  (add-to-list 'face-font-rescale-alist elt))
+ 
+;;; デフォルトフェイスにフォントセットを設定
+;;; (これは起動時に default-frame-alist に従ったフレームが作成されない現象への対処)
+(set-face-font 'default "fontset-myfonts")
