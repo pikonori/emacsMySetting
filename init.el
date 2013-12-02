@@ -363,3 +363,8 @@
 ;;; デフォルトフェイスにフォントセットを設定
 ;;; (これは起動時に default-frame-alist に従ったフレームが作成されない現象への対処)
 (set-face-font 'default "fontset-myfonts")
+
+
+;; yaml-mode
+(when (require 'yaml-mode nil t)
+  (add-to-list 'auto-mode-alist '("¥¥.yml$" . yaml-mode)))
