@@ -163,7 +163,18 @@
     (descbinds-anything-install))
   (require 'anything-grep nil t)
   (define-key global-map (kbd "C-l") 'anything)
+  (define-key global-map (kbd "M-y") 'anything-show-kill-ring)
   )
+
+(when (require 'anything-c-moccur nil t)
+  (setq
+   anything-c-moccur-anything-idle-delay 0.1
+   lanything-c-moccur-higligt-info-line-flg t
+   anything-c-moccur-enable-auto-look-flg t
+   anything-c-moccur-enable-initial-pattern t)
+  (define-key global-map (kbd "C-M-o") 'anything-c-moccur-occur-by-moccur))
+
+
 
 ;; php用
 (require 'php-mode)
@@ -292,20 +303,6 @@
 (require 'auto-highlight-symbol)
 (global-auto-highlight-symbol-mode t)
 
-;; php
-(defun flymake-php-init ()
-  (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                     'flymake-create-temp-inplace))
-         (local-file (file-relative-name
-                      temp-file
-                      (file-name-directory buffer-file-name))))
-    (list "php" (list "-l" local-file))))
-(push '(".+\\.php$" flymake-php-init) flymake-allowed-file-name-masks)
-(push '("(Parse|Fatal) error: (.*) in (.*) on line ([0-9]+)" 3 4 nil 2) flymake-err-line-patterns)
-
-(add-hook 'php-mode-hook (flymake-mode t))
-
-
 ;;バックアップファイルの保存先変更
 
 (setq make-backup-files t)
@@ -322,9 +319,8 @@
   (and (set (make-local-variable 'tab-width) 2)
        (set (make-local-variable 'coffee-tab-width) 2))
   )
-
 (add-hook 'coffee-mode-hook
-  '(lambda() (coffee-custom)))
+          '(lambda() (coffee-custom)))
 
 ;; csv-mode
 (add-to-list 'auto-mode-alist '("\\.[Cc][Ss][Vv]\\'" . csv-mode))
@@ -339,7 +335,7 @@
        (jpfont "Hiragino Maru Gothic ProN") ; 日本語フォント
        (font (format "%s-%d:weight=normal:slant=normal" asciifont size))
        (fontspec (font-spec :family asciifont))
-       (jp-fontspec (font-spec :family jpfont)) 
+       (jp-fontspec (font-spec :family jpfont))
        (fsn (create-fontset-from-ascii-font font nil fontset-name)))
   (set-fontset-font fsn 'japanese-jisx0213.2004-1 jp-fontspec)
   (set-fontset-font fsn 'japanese-jisx0213-2 jp-fontspec)
@@ -347,19 +343,20 @@
   (set-fontset-font fsn '(#x0080 . #x024F) fontspec) ; 分音符付きラテン
   (set-fontset-font fsn '(#x0370 . #x03FF) fontspec) ; ギリシャ文字
   )
- 
+
 ;;; デフォルトのフレームパラメータでフォントセットを指定
 (add-to-list 'default-frame-alist '(font . "fontset-myfonts"))
- 
+
 ;;; フォントサイズの比を設定
 (dolist (elt '(("^-apple-hiragino.*" . 1.2)
-	       (".*osaka-bold.*" . 1.2)
-	       (".*osaka-medium.*" . 1.2)
-	       (".*courier-bold-.*-mac-roman" . 1.0)
-	       (".*monaco cy-bold-.*-mac-cyrillic" . 0.9)
-	       (".*monaco-bold-.*-mac-roman" . 0.9)))
+               (".*osaka-bold.*" . 1.2)
+               (".*osaka-medium.*" . 1.2)
+               (".*courier-bold-.*-mac-roman" . 1.0)
+               (".*monaco cy-bold-.*-mac-cyrillic" . 0.9)
+               (".*monaco-bold-.*-mac-roman" . 0.9)))
   (add-to-list 'face-font-rescale-alist elt))
- 
+
+
 ;;; デフォルトフェイスにフォントセットを設定
 ;;; (これは起動時に default-frame-alist に従ったフレームが作成されない現象への対処)
 (set-face-font 'default "fontset-myfonts")
@@ -368,3 +365,50 @@
 ;; yaml-mode
 (when (require 'yaml-mode nil t)
   (add-to-list 'auto-mode-alist '("¥¥.yml$" . yaml-mode)))
+
+
+;;;
+;;; org-mode
+;;;
+;; org-modeの初期化
+(require 'org-install)
+;; キーバインドの設定
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(define-key global-map "\C-cr" 'org-remember)
+;; 拡張子がorgのファイルを開いた時，自動的にorg-modeにする
+(add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+;; org-modeでの強調表示を可能にする
+(add-hook 'org-mode-hook 'turn-on-font-lock)
+;; 見出しの余分な*を消す
+(setq org-hide-leading-stars t)
+;; org-default-notes-fileのディレクトリ
+(setq org-directory "~/org/")
+;; org-default-notes-fileのファイル名
+(setq org-default-notes-file "notes.org")
+
+;; TODO状態
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "WAIT(w)" "|" "DONE(d)" "SOMEDAY(s)")))
+;; DONEの時刻を記録
+(setq org-log-done 'time)
+
+;; アジェンダ表示の対象ファイル
+(setq org-agenda-files (list org-directory))
+;; アジェンダ表示で下線を用いる
+(add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1)))
+(setq hl-line-face 'underline)
+;; 標準の祝日を利用しない
+(setq calendar-holidays nil)
+
+;; org-rememberを使う
+(org-remember-insinuate)
+;; org-rememberのテンプレート
+(setq org-remember-templates
+      '(("Note" ?n "* %?\n  %i\n  %a" nil "Tasks")
+	("Todo" ?t "* TODO %?\n  %i\n  %a" nil "Tasks")))
+
+;; typescript
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+(autoload 'typescript-mode "TypeScript" "Major mode for editing typescript." t)
+
