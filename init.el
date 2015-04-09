@@ -180,8 +180,6 @@
 (require 'php-mode)
 
 (setq php-mode-force-pear t) ;PEAR規約のインデント設定にする
-(add-to-list 'auto-mode-alist '("\\.php$" . php-mode));*.phpのファイルのときにphp-modeを自動起動する
-(add-to-list 'auto-mode-alist '("\\.ctp$" . html-mode));*.ctpのファイルのときにphp-modeを自動起動する
 
 
 (add-hook 'php-mode-hook
@@ -411,4 +409,52 @@
 ;; typescript
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
 (autoload 'typescript-mode "TypeScript" "Major mode for editing typescript." t)
+
+;; rvmがshellで使えるようにする。
+(require 'rvm)
+(rvm-use-default)
+
+;; コントロール用のバッファを同一フレーム内に表示
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+;; diffのバッファを上下ではなく左右に並べる
+(setq ediff-split-window-function 'split-window-horizontally)
+
+
+
+(require 'scss-mode)
+(add-to-list 'auto-mode-alist '("\\.scss$" . scss-mode))
+
+;; インデント幅を2にする
+;; コンパイルは compass watchで行うので自動コンパイルをオフ
+(defun scss-custom ()
+  "scss-mode-hook"
+  (and
+   (set (make-local-variable 'css-indent-offset) 2)
+   (set (make-local-variable 'scss-compile-at-save) nil)
+   )
+  )
+(add-hook 'scss-mode-hook
+  '(lambda() (scss-custom)))
+
+
+
+
+
+
+
+(require 'web-mode)
+(add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+;(add-to-list 'auto-mode-alist '("\\.php$" . php-mode));*.phpのファイルのときにphp-modeを自動起動する
+(add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.ctp$" . web-mode));*.ctpのファイルのときにphp-modeを自動起動する
+(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.scss\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.xml\\'" . web-mode))
 
